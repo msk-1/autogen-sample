@@ -8,9 +8,9 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
 
 assistant_id = os.environ.get("ASSISTANT_ID", None)
-print(assistant_id)
+
 llm_config = {
-    "config_list": [{"model": "gpt-4o", "api_key": os.environ["OPENAI_API_KEY"]}],
+    "config_list": [{"model": "gpt-4o-2024-05-13", "api_key": os.environ["OPENAI_API_KEY"]}],
 }
 
 assistant_config = {"assistant_id": assistant_id}
