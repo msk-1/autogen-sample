@@ -22,50 +22,32 @@ def turn_on_the_air_conditioner() -> bool:
     return True
 
 
-# デバイス管理エージェント
-device_agent = ConversableAgent(
-    name="DeviceAgent",
+agent1 = ConversableAgent(
+    name="Agent1",
     system_message="""
     ## 指示
-    あなたは室内のIoT機器を制御するAIです。
-    ユーザの指示により、適切な機能を実行してください。
-    最も適切な回答が完成したら、最後にTERMINATEと出力してください。
+    ユーザから電話番号を聞いて下さい。
+    電話番号が確認できたら、最後にTERMINATEと出力してください。
     """,
     llm_config={"config_list": [{"model": "gpt-4o-2024-05-13", "api_key": os.environ["OPENAI_API_KEY"]}]},
+    is_termination_msg=lambda msg: msg.get("content") is not None and "TERMINATE" in msg["content"],
 )
 
 # デバイスエージェントに関数を登録する
-device_agent.register_for_llm(name="turn_on_the_light", description="電気を付ける関数")(turn_on_the_light)
-device_agent.register_for_llm(name="turn_on_the_air_conditioner", description="エアコンを付ける関数")(
+agent1.register_for_llm(name="turn_on_the_air_conditioner", description="エアコンを付ける関数")(
     turn_on_the_air_conditioner)
 
-
-# 音楽のレコメンド
-# 引数の雰囲気にあった曲名を返す
-def recommend_music(feeling: str) -> str:
-    # SpotifyのレコメンドAPIとかを呼べばいい
-    print("call recommend_music", "楽曲提案をしました。")
-    if feeling == "sad":
-        return "レット・イット・ビー"
-    elif feeling == "楽しい":
-        return "天体観測"
-    else:
-        return "レモン"
-
-
 # 音楽エージェント
-music_agent = AssistantAgent(
-    name="MusicAgent",
+agent2 = AssistantAgent(
+    name="Agent2",
     system_message="""
     ## 指示
-    あなたは音楽に詳しい人です。
-    ユーザの気分に合わせたオススメの曲を提案してください。
-    最も適切な回答が完成したら、最後にTERMINATEと出力してください。
+    ユーザの氏名を確認してください。
+    氏名が確認できたら、最後にTERMINATEと出力してください。
     """,
     llm_config={"config_list": [{"model": "gpt-4o-2024-05-13", "api_key": os.environ["OPENAI_API_KEY"]}]},
+    is_termination_msg=lambda msg: msg.get("content") is not None and "TERMINATE" in msg["content"],
 )
-
-music_agent.register_for_llm(name="recommend_music", description="ユーザの気分からオススメの楽曲を提案する関数")(recommend_music)
 
 # ユーザープロキシエージェントはアシスタントエージェントと対話するために使用されます。
 # ツールコールを実行します。
@@ -73,17 +55,16 @@ user_proxy = AssistantAgent(
     name="Manager",
     llm_config=False,
     is_termination_msg=lambda msg: msg.get("content") is not None and "TERMINATE" in msg["content"],
-    human_input_mode="NEVER",
+    human_input_mode="ALWAYS",
 )
 
 # ツール関数をユーザプロキシエージェントに登録します
 user_proxy.register_for_execution(name="turn_on_the_light")(turn_on_the_light)
 user_proxy.register_for_execution(name="turn_on_the_air_conditioner")(turn_on_the_air_conditioner)
-user_proxy.register_for_execution(name="recommend_music")(recommend_music)
 
 group_chat = GroupChat(
-    agents=[user_proxy, device_agent, music_agent], messages=[], max_round=10, speaker_selection_method="auto"
+    agents=[user_proxy, agent1, agent2], messages=[], max_round=20, speaker_selection_method="auto"
 )
 manager = GroupChatManager(groupchat=group_chat)
 # user_proxy.initiate_chat(manager, message="今日は少し悲しい気分だよ。なにかおすすめの曲はない？")
-user_proxy.initiate_chat(manager, message="クーラーつけて")
+user_proxy.initiate_chat(manager, message="こんにちは")
