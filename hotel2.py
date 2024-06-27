@@ -40,8 +40,8 @@ speaker_hist = []
 
 
 # 次のスピーカを選択する
-def speaker_selection(last_speaker, groupchat):
-    messages = groupchat.messages
+def speaker_selection(last_speaker, group_chat):
+    messages = group_chat.messages
 
     speaker_hist.append(last_speaker)
 
@@ -62,13 +62,13 @@ def speaker_selection(last_speaker, groupchat):
     return next_agent
 
 
-groupchat = autogen.GroupChat(
+group_chat = autogen.GroupChat(
     agents=[initializer, human_proxy, hotel_reserve_agent, hotel_search_agent],
     messages=[],
     max_round=20,
     speaker_selection_method=speaker_selection,
 )
-manager = autogen.GroupChatManager(groupchat=groupchat)
+manager = autogen.GroupChatManager(groupchat=group_chat)
 
 initializer.initiate_chat(
     manager, message="こんにちは"

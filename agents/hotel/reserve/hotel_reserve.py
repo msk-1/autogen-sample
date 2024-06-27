@@ -4,7 +4,6 @@ from hotel import reserve_hotel
 
 
 class HotelReserve:
-    RESERVE_HOTEL_FUNC_NAME = "reserve_hotel"
 
     def __init__(self, llm_config):
         # ホテル予約エージェント

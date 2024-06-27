@@ -7,7 +7,6 @@ from hotel import search_hotel
 
 
 class HotelSearch:
-    SEARCH_HOTEL_FUNC_NAME = "search_hotel"
 
     def __init__(self, llm_config):
         # ホテル検索
